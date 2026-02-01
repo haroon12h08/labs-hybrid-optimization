@@ -160,6 +160,26 @@ def solve_labs_random_restart(N, num_restarts=10):
     return best_seq, best_cost
 
 
+def optimize_from_seed(seed_sequence):
+    """
+    Optimizes a LABS sequence starting from an externally provided seed.
+    
+    This function acts as the interface for injecting sequences generated
+    by other methods (e.g., Quantum Annealers, QAOA, heuristics) into
+    the classical hill-climbing optimizer.
+    
+    Args:
+        seed_sequence: A 1-D list/array of {-1, 1} integers.
+        
+    Returns:
+        A tuple (optimized_sequence, final_cost).
+    """
+    # Simply delegate to the deterministic hill climber
+    # This ensures the classical refinement is applied consistently
+    # regardless of the source.
+    return hill_climb_deterministic(seed_sequence)
+
+
 if __name__ == "__main__":
     # import random  <-- Removed local import since we moved it to top
 
@@ -213,5 +233,24 @@ if __name__ == "__main__":
     # Random restart demo
     best_seq_rr, best_cost_rr = solve_labs_random_restart(N=30, num_restarts=20)
     print(f"Global Best Found (N=30): {best_cost_rr}")
+
+    print("\n")
+    print("--- Seed Injection Demo ---")
+    
+    # 1. Generate an external 'seed' (simulating a quantum result)
+    N_seed = 25
+    external_seed = generate_random_sequence(N_seed)
+    seed_cost = labs_cost(external_seed)
+    print(f"Injection Seed (N={N_seed}) Cost: {seed_cost}")
+    
+    # 2. Refine it using the interface
+    refined_seq, refined_cost = optimize_from_seed(external_seed)
+    print(f"Refined Sequence Cost: {refined_cost}")
+    
+    if refined_cost < seed_cost:
+        print("Success: Seed was improved by classical optimizer.")
+    else:
+        print("Seed was already at a local optimum.")
+
 
 
