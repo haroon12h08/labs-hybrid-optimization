@@ -72,6 +72,57 @@ def run_random_baseline(N, num_samples=10):
     return costs
 
 
+def hill_climb_deterministic(sequence):
+    """
+    Performs a deterministic hill-climbing optimization on the given LABS sequence.
+    
+    Algorithm:
+    1. Start with the input sequence.
+    2. Iterate through each bit position.
+    3. Flip the bit and check if the cost strictly decreases.
+    4. If cost decreases, keep the flip.
+    5. Repeat until a full pass over the sequence results in no changes.
+    
+    Args:
+        sequence: A list of integers {-1, 1}.
+        
+    Returns:
+        A tuple (optimized_sequence, final_cost).
+    """
+    # Work on a copy to avoid side effects on the input object
+    current_seq = list(sequence)
+    current_cost = labs_cost(current_seq)
+    N = len(current_seq)
+    
+    # Loop until no improvement is found in a full pass
+    while True:
+        improved = False
+        
+        # Iterate over every bit
+        for i in range(N):
+            # 1. Flip the bit
+            current_seq[i] *= -1
+            
+            # 2. Compute new cost
+            new_cost = labs_cost(current_seq)
+            
+            # 3. Check for strict improvement
+            if new_cost < current_cost:
+                current_cost = new_cost
+                improved = True
+                # Keep the change
+            else:
+                # Revert the flip
+                current_seq[i] *= -1
+                
+        # If we went through the whole sequence without a single improvement, stop.
+        if not improved:
+            break
+            
+    return current_seq, current_cost
+
+
+
 if __name__ == "__main__":
     # import random  <-- Removed local import since we moved it to top
 
@@ -104,3 +155,20 @@ if __name__ == "__main__":
     print("\n")
     # Run a baseline check for a larger N
     run_random_baseline(N=20, num_samples=10)
+
+    print("\n--- Hill Climbing Demo ---")
+    # Generate a random start
+    N_opt = 20
+    start_seq = generate_random_sequence(N_opt)
+    start_cost = labs_cost(start_seq)
+    
+    print(f"Start Sequence (N={N_opt}) Cost: {start_cost}")
+    
+    opt_seq, opt_cost = hill_climb_deterministic(start_seq)
+    
+    print(f"Final Sequence Cost: {opt_cost}")
+    if opt_cost < start_cost:
+        print("Optimization successful: Cost reduced.")
+    else:
+        print("No improvement found (local optimum).")
+
