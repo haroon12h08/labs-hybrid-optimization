@@ -122,6 +122,43 @@ def hill_climb_deterministic(sequence):
     return current_seq, current_cost
 
 
+def solve_labs_random_restart(N, num_restarts=10):
+    """
+    Solves the LABS problem using Random-Restart Hill Climbing.
+    
+    Why this helps:
+    Deterministic hill climbing gets stuck in local minima depending on the start point.
+    By restarting multiple times from random initial configurations, we sample 
+    different basins of attraction, increasing the probability of finding 
+    a better local optimum (or the global optimum).
+    
+    Args:
+        N: Sequence length.
+        num_restarts: Number of independent restarts to perform.
+        
+    Returns:
+        A tuple (best_sequence, best_cost).
+    """
+    best_seq = None
+    best_cost = float('inf')
+    
+    print(f"--- Random Restart Hill Climbing (N={N}, Restarts={num_restarts}) ---")
+    
+    for r in range(num_restarts):
+        # 1. Generate random start
+        start_seq = generate_random_sequence(N)
+        
+        # 2. Optimize
+        final_seq, final_cost = hill_climb_deterministic(start_seq)
+        
+        # 3. Track best
+        if final_cost < best_cost:
+            best_cost = final_cost
+            best_seq = final_seq
+            print(f"Restart {r+1}: New Best Cost = {best_cost}")
+    
+    return best_seq, best_cost
+
 
 if __name__ == "__main__":
     # import random  <-- Removed local import since we moved it to top
@@ -171,4 +208,10 @@ if __name__ == "__main__":
         print("Optimization successful: Cost reduced.")
     else:
         print("No improvement found (local optimum).")
+
+    print("\n")
+    # Random restart demo
+    best_seq_rr, best_cost_rr = solve_labs_random_restart(N=30, num_restarts=20)
+    print(f"Global Best Found (N=30): {best_cost_rr}")
+
 
