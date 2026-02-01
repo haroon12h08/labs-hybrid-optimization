@@ -89,5 +89,31 @@ def run_experiment():
         o_val = sorted_opt[i]
         print(f"Rank {i+1:2}: Random {r_val:4}  vs  Optimized {o_val:4}")
 
+    print("\n--- Cost Histogram (Text-Based) ---")
+    def print_hist(label, data, char='*'):
+        print(f"\n{label}:")
+        if not data: return
+        min_v, max_v = min(data), max(data)
+        # Create bins
+        bins = 10
+        width = (max_v - min_v) / bins if max_v > min_v else 1
+        
+        hist = [0] * (bins + 1)
+        for v in data:
+            idx = int((v - min_v) / width)
+            idx = min(idx, bins)
+            hist[idx] += 1
+            
+        for i in range(bins + 1):
+            range_start = min_v + i * width
+            range_end = min_v + (i + 1) * width
+            if i == bins:
+                print(f"[{range_start:6.1f}+       ] | {''.join([char]*hist[i])} ({hist[i]})")
+            else:
+                print(f"[{range_start:6.1f}-{range_end:6.1f}] | {''.join([char]*hist[i])} ({hist[i]})")
+
+    print_hist("Random Costs", random_costs, char='#')
+    print_hist("Optimized Costs", optimized_costs, char='@')
+
 if __name__ == "__main__":
     run_experiment()
